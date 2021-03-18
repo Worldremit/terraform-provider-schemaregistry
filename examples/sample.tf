@@ -1,14 +1,12 @@
 provider "schemaregistry" {
-  version = "1.0.0"
+  version = "0.1.0"
   url = "https://username:password@hostname"
 }
 
 resource "schemaregistry_subject_schema" "kafka_schemas" {
   for_each = {
-    "rafal-test-4": "\"string\""
+    "test-schema": "\"string\""
   }
   subject = each.key
   schema = each.value
-
-  //compatibility_level = var.schema_compatibility
 }

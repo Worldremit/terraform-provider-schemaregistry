@@ -5,32 +5,6 @@ PKG_NAME=schemaregistry
 
 default: build
 
-
-test-import:
-	go build -o terraform-provider-schemaregistry
-	mkdir -p ~/.terraform.d/plugins/registry.terraform.io/hashicorp/schemaregistry/1.0.0/linux_amd64
-	cp terraform-provider-schemaregistry ~/.terraform.d/plugins/registry.terraform.io/hashicorp/schemaregistry/1.0.0/linux_amd64/terraform-provider-schemaregistry_v1.0.0-linux-amd64
-	cd examples; rm -rf .terraform; rm -f *.tfstate*
-	cd examples; terraform init; TF_LOG=DEBUG terraform import 'schemaregistry_subject_schema.kafka_schemas["rafal-test-4"]' rafal-test-4
-
-test-plan:
-	go build -o terraform-provider-schemaregistry
-	mkdir -p ~/.terraform.d/plugins/registry.terraform.io/hashicorp/schemaregistry/1.0.0/linux_amd64
-	cp terraform-provider-schemaregistry ~/.terraform.d/plugins/registry.terraform.io/hashicorp/schemaregistry/1.0.0/linux_amd64/terraform-provider-schemaregistry_v1.0.0-linux-amd64
-	cd examples; rm -rf .terraform; rm -f *.tfstate*
-	cd examples; terraform init; terraform plan; terraform apply
-
-clean:
-	cd examples; rm -rf .terraform; rm -f *.tfstate*
-
-rebuild:
-	go build -o terraform-provider-schemaregistry
-	mkdir -p ~/.terraform.d/plugins/registry.terraform.io/hashicorp/schemaregistry/1.0.0/linux_amd64
-	cp terraform-provider-schemaregistry ~/.terraform.d/plugins/registry.terraform.io/hashicorp/schemaregistry/1.0.0/linux_amd64/terraform-provider-schemaregistry_v1.0.0-linux-amd64
-
-
-
-
 build: fmtcheck
 	go install
 
@@ -81,5 +55,28 @@ ifeq (,$(wildcard $(GOPATH)/src/$(WEBSITE_REPO)))
 	git clone https://$(WEBSITE_REPO) $(GOPATH)/src/$(WEBSITE_REPO)
 endif
 	@$(MAKE) -C $(GOPATH)/src/$(WEBSITE_REPO) website-provider-test PROVIDER_PATH=$(shell pwd) PROVIDER_NAME=$(PKG_NAME)
+
+
+wr-test-import:
+	go build -o terraform-provider-schemaregistry
+	mkdir -p ~/.terraform.d/plugins/registry.terraform.io/hashicorp/schemaregistry/0.1.0/linux_amd64
+	cp terraform-provider-schemaregistry ~/.terraform.d/plugins/registry.terraform.io/hashicorp/schemaregistry/0.1.0/linux_amd64/terraform-provider-schemaregistry_v0.1.0-linux-amd64
+	cd examples; rm -rf .terraform; rm -f *.tfstate*
+	cd examples; terraform init; TF_LOG=DEBUG terraform import 'schemaregistry_subject_schema.kafka_schemas["rafal-test-4"]' rafal-test-4
+
+wr-test-plan:
+	go build -o terraform-provider-schemaregistry
+	mkdir -p ~/.terraform.d/plugins/registry.terraform.io/hashicorp/schemaregistry/0.1.0/linux_amd64
+	cp terraform-provider-schemaregistry ~/.terraform.d/plugins/registry.terraform.io/hashicorp/schemaregistry/0.1.0/linux_amd64/terraform-provider-schemaregistry_v0.1.0-linux-amd64
+	cd examples; rm -rf .terraform; rm -f *.tfstate*
+	cd examples; terraform init; terraform plan; terraform apply
+
+wr-clean:
+	cd examples; rm -rf .terraform; rm -f *.tfstate*
+
+wr-rebuild:
+	go build -o terraform-provider-schemaregistry
+	mkdir -p ~/.terraform.d/plugins/registry.terraform.io/hashicorp/schemaregistry/0.1.0/linux_amd64
+	cp terraform-provider-schemaregistry ~/.terraform.d/plugins/registry.terraform.io/hashicorp/schemaregistry/0.1.0/linux_amd64/terraform-provider-schemaregistry_v0.1.0-linux-amd64
 
 .PHONY: build test testacc vet fmt fmtcheck errcheck test-compile website website-test

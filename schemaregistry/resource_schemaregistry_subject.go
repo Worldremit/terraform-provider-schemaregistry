@@ -131,32 +131,21 @@ func resourceSchemaRegistrySubjectSchemaDelete(rd *schema.ResourceData, meta int
 	return nil
 }
 
-func resourceKafkaSchemaRead(rd *schema.ResourceData, meta interface{}) error {
+func resourceSchemaRegistrySubjectSchemaState(rd *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	ID := strings.Split(rd.Id(), IDSeparator)
 	subject := ID[0]
-	log.Printf("[ID] %s", subject)
+
 	client := meta.(*schemaregistry.Client)
 	schemaDefinition, err := client.GetLatestSchema(subject)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	log.Printf("[ID]ADSSSSSSSSSSSSSSSSSSDDDDDDDDDDDDDDDDDDDDDDDDD")
-	log.Printf("[ID] %s", schemaDefinition.Version)
-	//
+
+	log.Printf("[INFO] Recreating Schema Registry schema for subject '%s'", subject)
+
 	rd.SetId(subject + IDSeparator + strconv.Itoa(schemaDefinition.Version))
 	rd.Set("schema", schemaDefinition.Schema)
 	rd.Set("subject", subject)
-
-	return nil
-}
-
-func resourceSchemaRegistrySubjectSchemaState(rd *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	resourceKafkaSchemaRead(rd, meta)
-	//client := meta.(*schemaregistry.Client)
-	//di := resourceKafkaSchemaRead(ctx, d, m)
-	//if di.HasError() {
-	//	return nil, fmt.Errorf("cannot get kafka schema: %v", di)
-	//}
 
 	return []*schema.ResourceData{rd}, nil
 }
