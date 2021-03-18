@@ -5,7 +5,7 @@ provider "schemaregistry" {
 
 resource "schemaregistry_subject_schema" "kafka_schemas" {
   for_each = {
-    "test-schema": "\"string\""
+    "test-schema-prov": "\"string\""
   }
   subject = each.key
   schema = each.value
