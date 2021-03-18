@@ -56,5 +56,37 @@ ifeq (,$(wildcard $(GOPATH)/src/$(WEBSITE_REPO)))
 endif
 	@$(MAKE) -C $(GOPATH)/src/$(WEBSITE_REPO) website-provider-test PROVIDER_PATH=$(shell pwd) PROVIDER_NAME=$(PKG_NAME)
 
-.PHONY: build test testacc vet fmt fmtcheck errcheck test-compile website website-test
+BINARY=terraform-provider-schemaregistry
+VERSION=$(shell git describe --tags --dirty)
+PLATFORMS=darwin linux windows
+ARCHITECTURES=amd64
 
+wr-build-all: fmtcheck
+	$(foreach GOOS, $(PLATFORMS),\
+	$(foreach GOARCH, $(ARCHITECTURES), $(shell export GOOS=$(GOOS); export GOARCH=$(GOARCH); go build -v -o $(BINARY)_v$(VERSION)-$(GOOS)-$(GOARCH))))
+
+TEST_PLATFORM=linux
+TEST_ARCHITECTURE=amd64
+TEST_VERSION=$(shell git describe --tags --dirty)
+TEST_PLUGIN_SRC_PATH=~/.terraform.d/plugins/registry.terraform.io/hashicorp/schemaregistry
+
+wr-test-import:
+	mkdir -p ${TEST_PLUGIN_SRC_PATH}/${TEST_VERSION}/${TEST_PLATFORM}_${TEST_ARCHITECTURE}
+	go build -o ${TEST_PLUGIN_SRC_PATH}/${TEST_VERSION}/${TEST_PLATFORM}_${TEST_ARCHITECTURE}/${BINARY}_v${TEST_VERSION}-${TEST_PLATFORM}-${TEST_ARCHITECTURE}
+	cd examples; rm -rf .terraform; rm -f *.tfstate*
+	cd examples; terraform init; terraform import 'schemaregistry_subject_schema.kafka_schemas["test-schema-prov"]' test-schema-prov
+
+wr-test-plan:
+	mkdir -p ${TEST_PLUGIN_SRC_PATH}/${TEST_VERSION}/${TEST_PLATFORM}_${TEST_ARCHITECTURE}
+	go build -o ${TEST_PLUGIN_SRC_PATH}/${TEST_VERSION}/${TEST_PLATFORM}_${TEST_ARCHITECTURE}/${BINARY}_v${TEST_VERSION}-${TEST_PLATFORM}-${TEST_ARCHITECTURE}
+	cd examples; rm -rf .terraform; rm -f *.tfstate*
+	cd examples; terraform init; terraform plan;
+
+wr-clean:
+	cd examples; rm -rf .terraform; rm -f *.tfstate*
+
+wr-rebuild:
+	mkdir -p ${TEST_PLUGIN_SRC_PATH}/${TEST_VERSION}/${TEST_PLATFORM}_${TEST_ARCHITECTURE}
+	go build -o ${TEST_PLUGIN_SRC_PATH}/${TEST_VERSION}/${TEST_PLATFORM}_${TEST_ARCHITECTURE}/${BINARY}_v${TEST_VERSION}-${TEST_PLATFORM}-${TEST_ARCHITECTURE}
+
+.PHONY: build test testacc vet fmt fmtcheck errcheck test-compile website website-test
