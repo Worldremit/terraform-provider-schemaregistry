@@ -79,4 +79,22 @@ wr-rebuild:
 	mkdir -p ~/.terraform.d/plugins/registry.terraform.io/hashicorp/schemaregistry/0.1.0/linux_amd64
 	cp terraform-provider-schemaregistry ~/.terraform.d/plugins/registry.terraform.io/hashicorp/schemaregistry/0.1.0/linux_amd64/terraform-provider-schemaregistry_v0.1.0-linux-amd64
 
+openbsd_amd64:
+	GOOS=openbsd GOARCH=amd64 go build -o terraform-provider-schemaregistry
+	tar cvzf terraform-provider-schemaregistry_openbsd_amd64.tar.gz terraform-provider-schemaregistry
+
+freebsd_amd64:
+	GOOS=freebsd GOARCH=amd64 go build -o terraform-provider-schemaregistry
+	tar cvzf terraform-provider-schemaregistry_freebsd_amd64.tar.gz terraform-provider-schemaregistry
+
+linux_amd64:
+	GOOS=linux GOARCH=amd64 go build -o terraform-provider-schemaregistry
+	tar cvzf terraform-provider-schemaregistry_linux_amd64.tar.gz terraform-provider-schemaregistry
+
+darwin_amd64:
+	GOOS=darwin GOARCH=amd64 go build -o terraform-provider-schemaregistry
+	tar cvzf terraform-provider-schemaregistry_darwin_amd64.tar.gz terraform-provider-schemaregistry
+
+
+
 .PHONY: build test testacc vet fmt fmtcheck errcheck test-compile website website-test
