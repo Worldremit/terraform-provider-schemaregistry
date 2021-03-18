@@ -56,45 +56,37 @@ ifeq (,$(wildcard $(GOPATH)/src/$(WEBSITE_REPO)))
 endif
 	@$(MAKE) -C $(GOPATH)/src/$(WEBSITE_REPO) website-provider-test PROVIDER_PATH=$(shell pwd) PROVIDER_NAME=$(PKG_NAME)
 
+BINARY=terraform-provider-schemaregistry
+VERSION=$(shell git describe --tags --dirty)
+PLATFORMS=darwin linux windows
+ARCHITECTURES=amd64
 
+wr-build-all: fmtcheck
+	$(foreach GOOS, $(PLATFORMS),\
+	$(foreach GOARCH, $(ARCHITECTURES), $(shell export GOOS=$(GOOS); export GOARCH=$(GOARCH); go build -v -o $(BINARY)_$(VERSION)-$(GOOS)-$(GOARCH))))
+
+
+TEST_PLATFORM=linux
+TEST_ARCHITECTURE=amd64
+TEST_VERSION=0.1.0
+TEST_PLUGIN_SRC_PATH=~/.terraform.d/plugins/registry.terraform.io/hashicorp/schemaregistry
 wr-test-import:
-	go build -o terraform-provider-schemaregistry
-	mkdir -p ~/.terraform.d/plugins/registry.terraform.io/hashicorp/schemaregistry/0.1.0/linux_amd64
-	cp terraform-provider-schemaregistry ~/.terraform.d/plugins/registry.terraform.io/hashicorp/schemaregistry/0.1.0/linux_amd64/terraform-provider-schemaregistry_v0.1.0-linux-amd64
+	mkdir -p ${TEST_PLUGIN_SRC_PATH}/${TEST_VERSION}/${TEST_PLATFORM}_${TEST_ARCHITECTURE}
+	go build -o ${TEST_PLUGIN_SRC_PATH}/${TEST_VERSION}/${TEST_PLATFORM}_${TEST_ARCHITECTURE}/${BINARY}_v${TEST_VERSION}-${TEST_PLATFORM}-${TEST_ARCHITECTURE}
 	cd examples; rm -rf .terraform; rm -f *.tfstate*
-	cd examples; terraform init; TF_LOG=DEBUG terraform import 'schemaregistry_subject_schema.kafka_schemas["test-schema-prov"]' test-schema-prov
+	terraform init; terraform import 'schemaregistry_subject_schema.kafka_schemas["test-schema-prov"]' test-schema-prov
 
 wr-test-plan:
-	go build -o terraform-provider-schemaregistry
-	mkdir -p ~/.terraform.d/plugins/registry.terraform.io/hashicorp/schemaregistry/0.1.0/linux_amd64
-	cp terraform-provider-schemaregistry ~/.terraform.d/plugins/registry.terraform.io/hashicorp/schemaregistry/0.1.0/linux_amd64/terraform-provider-schemaregistry_v0.1.0-linux-amd64
+	mkdir -p ${TEST_PLUGIN_SRC_PATH}/${TEST_VERSION}/${TEST_PLATFORM}_${TEST_ARCHITECTURE}
+	go build -o ${TEST_PLUGIN_SRC_PATH}/${TEST_VERSION}/${TEST_PLATFORM}_${TEST_ARCHITECTURE}/${BINARY}_v${TEST_VERSION}-${TEST_PLATFORM}-${TEST_ARCHITECTURE}
 	cd examples; rm -rf .terraform; rm -f *.tfstate*
-	cd examples; terraform init; terraform plan; terraform apply
+	terraform init; terraform plan; terraform apply
 
 wr-clean:
 	cd examples; rm -rf .terraform; rm -f *.tfstate*
 
 wr-rebuild:
-	go build -o terraform-provider-schemaregistry
-	mkdir -p ~/.terraform.d/plugins/registry.terraform.io/hashicorp/schemaregistry/0.1.0/linux_amd64
-	cp terraform-provider-schemaregistry ~/.terraform.d/plugins/registry.terraform.io/hashicorp/schemaregistry/0.1.0/linux_amd64/terraform-provider-schemaregistry_v0.1.0-linux-amd64
-
-openbsd_amd64:
-	GOOS=openbsd GOARCH=amd64 go build -o terraform-provider-schemaregistry
-	tar cvzf terraform-provider-schemaregistry_openbsd_amd64.tar.gz terraform-provider-schemaregistry
-
-freebsd_amd64:
-	GOOS=freebsd GOARCH=amd64 go build -o terraform-provider-schemaregistry
-	tar cvzf terraform-provider-schemaregistry_freebsd_amd64.tar.gz terraform-provider-schemaregistry
-
-linux_amd64:
-	GOOS=linux GOARCH=amd64 go build -o terraform-provider-schemaregistry
-	tar cvzf terraform-provider-schemaregistry_linux_amd64.tar.gz terraform-provider-schemaregistry
-
-darwin_amd64:
-	GOOS=darwin GOARCH=amd64 go build -o terraform-provider-schemaregistry
-	tar cvzf terraform-provider-schemaregistry_darwin_amd64.tar.gz terraform-provider-schemaregistry
-
-
+	mkdir -p ${TEST_PLUGIN_SRC_PATH}/${TEST_VERSION}/${TEST_PLATFORM}_${TEST_ARCHITECTURE}
+	go build -o ${TEST_PLUGIN_SRC_PATH}/${TEST_VERSION}/${TEST_PLATFORM}_${TEST_ARCHITECTURE}/${BINARY}_v${TEST_VERSION}-${TEST_PLATFORM}-${TEST_ARCHITECTURE}
 
 .PHONY: build test testacc vet fmt fmtcheck errcheck test-compile website website-test
